@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -45,6 +46,7 @@ public class PlaceManagement extends AppCompatActivity implements Observer {
 
     Place place;
 
+    private static final String TAG = "myLog";
 
 
     @Override
@@ -105,22 +107,23 @@ public class PlaceManagement extends AppCompatActivity implements Observer {
         JSONWeatherTask wt = new JSONWeatherTask(place.getLatLng().latitude, place.getLatLng().longitude);
         wt.register(this);
         wt.execute();
+
     }
 
     @Override
     public void update(Observable observable, Object data) {
         if (data instanceof Weather){
             Toast.makeText(this, data.toString(), Toast.LENGTH_LONG).show();
-            return;
+            Log.d(TAG, "Background task completed and call observed");
             //addDataToDatabase(data);
         }
+
     }
 
     private void addDataToDatabase(Object data) {
         Weather forecast = (Weather) data;
         SQLiteDatabase db = placesDB.getWritableDatabase();
         ContentValues cv = new ContentValues();
-        cv.put(DatabaseHelper.CITY_ID, place.getId());
         cv.put(DatabaseHelper.CITY_NAME, place.getName());
         cv.put(DatabaseHelper.CITY_ADDRESS, place.getAddress());
         cv.put(DatabaseHelper.LATITUDE, place.getLatLng().latitude);
@@ -132,6 +135,9 @@ public class PlaceManagement extends AppCompatActivity implements Observer {
         cv.put(DatabaseHelper.PRESSURE, forecast.getPressure());
         cv.put(DatabaseHelper.WIND_SPEED, forecast.getWind_speed());
         cv.put(DatabaseHelper.WIND_DEG, forecast.getWind_deg());
+        cv.put(DatabaseHelper.RAIN, forecast.isRaining());
+        cv.put(DatabaseHelper.SNOW, forecast.isSnowing());
+        cv.put(DatabaseHelper.CLOUDS, forecast.getClouds());
         db.insert(DatabaseHelper.TABLE_NAME, null, cv);
         db.close();
         mAdapter.swapCursor(getAllPlaces());

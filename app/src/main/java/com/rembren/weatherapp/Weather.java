@@ -13,9 +13,6 @@ public class Weather {
 
     private static final String TAG = "myLog";
 
-    private static final int KELVIN_THRESHOLD = 100;
-    private static final double KELVIN_SUBTRACTION = 273.15;
-
     private String city_name;
     private String weather_main;
     private String weather_description;
@@ -25,6 +22,8 @@ public class Weather {
     private double wind_speed;
     private double wind_deg;
     private int clouds;
+    private boolean rain;
+    private boolean snow;
 
 
     @NonNull
@@ -33,11 +32,13 @@ public class Weather {
         return "City: " + city_name + " Weather: " + weather_main + " Description: " +
                 weather_description + " Temperature: " + temperature + " Pressure: " +
                 pressure + " Humidity: " + humidity + " Wind Speed " + wind_speed +
-                " Wind deg: " + wind_deg + " Clouds: " + clouds;
+                " Wind deg: " + wind_deg + " Clouds: " + clouds + " Raining: " + rain + " Snowing: "
+                + snow;
     }
 
+
     /**
-     * This method parse the string in input and create the relative Weather object.
+     * This method parses the string in input and create the relative Weather object.
      *
      * @param jsonStr string given in JSON to parse
      * @return Weather object that contains parsed data
@@ -48,8 +49,6 @@ public class Weather {
 
         // Parsing the response
         JSONObject json = new JSONObject(jsonStr);
-        Log.d("weather", "jsonobject=" + json);
-
         //We get weather info (This is an array)
         JSONArray json_weather_main = json.getJSONArray("weather");
         // We use only the first value
@@ -58,7 +57,7 @@ public class Weather {
         weather.weather_description = weatherObj.getString("description");
         //Main params
         JSONObject mainObj = new JSONObject(json.getString("main"));
-        weather.temperature = checkIfKelvin(mainObj.getDouble("temp"));
+        weather.temperature = mainObj.getDouble("temp");
         weather.pressure = mainObj.getDouble("pressure");
         weather.humidity = mainObj.getInt("humidity");
         // Wind
@@ -70,56 +69,58 @@ public class Weather {
         weather.clouds = cObj.getInt("all");
         // City name
         weather.city_name = json.getString("name");
+        // Precipitation
+        weather.rain = json.has("rain")
+                && new JSONObject(json.getString("rain")).has("1h");
+        weather.snow = json.has("snow")
+                && new JSONObject(json.getString("snow")).has("1h");
+
         Log.d(TAG, weather.toString());
         return weather;
-    }
-
-    /**
-     * Checks if the temperature is given in Kelvin and transforms it into Celsius if so
-     *
-     * @param temp temperature to check
-     * @return temperature in Celsius
-     */
-    private static double checkIfKelvin(double temp) {
-        if (temp > KELVIN_THRESHOLD) {
-            return temp - KELVIN_SUBTRACTION;
-        }
-        return temp;
     }
 
     public String getCity_name() {
         return city_name;
     }
 
-    public String getWeather_main() {
+    String getWeather_main() {
         return weather_main;
     }
 
-    public String getWeather_description() {
+    String getWeather_description() {
         return weather_description;
     }
 
-    public double getTemperature() {
+    double getTemperature() {
         return temperature;
     }
 
-    public double getPressure() {
+    double getPressure() {
         return pressure;
     }
 
-    public int getHumidity() {
+    int getHumidity() {
         return humidity;
     }
 
-    public double getWind_speed() {
+    double getWind_speed() {
         return wind_speed;
     }
 
-    public double getWind_deg() {
+    double getWind_deg() {
         return wind_deg;
     }
 
-    public int getClouds() {
+    int getClouds() {
         return clouds;
     }
+
+    boolean isRaining() {
+        return rain;
+    }
+
+    boolean isSnowing() {
+        return snow;
+    }
+
 }

@@ -12,7 +12,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "selected_places.db";
     public static final String TABLE_NAME = "selected_places_table";
     public static final String ITEM_ID = "ID";
-    public static final String CITY_ID = "CITY_ID";
     public static final String CITY_NAME = "NAME";
     public static final String CITY_ADDRESS = "ADDRESS";
     public static final String LATITUDE = "LAT";
@@ -25,8 +24,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String WIND_SPEED = "WIND_SPEED";
     public static final String WIND_DEG = "WIND_DEG";
     public static final String CLOUDS = "CLOUDS";
-    public static final String RAIN_TIME = "RAIN_TIME";
-    public static final String RAIN_CHANCE = "RAIN_CHANCE";
+    public static final String RAIN = "RAIN";
+    public static final String SNOW = "SNOW";
 
 
 
@@ -38,7 +37,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table " + TABLE_NAME + " ("+
                 ITEM_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                CITY_ID + " TEXT," +
                 CITY_NAME + " TEXT, " +
                 CITY_ADDRESS + " TEXT," +
                 LATITUDE + " DOUBLE," +
@@ -49,7 +47,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 HUMIDITY + " INTEGER," +
                 PRESSURE + " DOUBLE," +
                 WIND_SPEED + " DOUBLE," +
-                WIND_DEG + " DOUBLE) ");
+                WIND_DEG + " DOUBLE," +
+                RAIN + " BOOLEAN," +
+                SNOW + " BOOLEAN)");
     }
 
     @Override

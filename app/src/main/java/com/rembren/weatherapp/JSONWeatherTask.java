@@ -5,11 +5,10 @@ import android.util.Log;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Observable;
 import java.util.Observer;
 import java.util.Scanner;
 
-public class JSONWeatherTask extends AsyncTask<Object, Integer, Weather> {
+public class JSONWeatherTask extends AsyncTask<Object, Integer, Weather>{
 
 
     private static final String TAG = "myLog";
@@ -20,25 +19,24 @@ public class JSONWeatherTask extends AsyncTask<Object, Integer, Weather> {
 
     public static final String METRIC_ENDING = "&units=metric";
 
-    private Observable wn = new Observable();//simple Observable Object created to nofity event
+    private SimpleWeatherObservable obs = new SimpleWeatherObservable(); //simple Observable Object created to nofity event
 
-    private StringBuilder jsonurl = new StringBuilder();
+    private StringBuilder jsonUrl = new StringBuilder();
     private StringBuilder data = new StringBuilder();
 
 
 
     public JSONWeatherTask(double lat, double lon) {
         super();
-        jsonurl.append(BASE_URL).append("?lat=").append(lat).append("&lon=").append(lon)
+        jsonUrl.append(BASE_URL).append("?lat=").append(lat).append("&lon=").append(lon)
                 .append("&APPID=").append(WEATHER_MAP_API_KEY).append(METRIC_ENDING);
     }
 
     @Override
     protected Weather doInBackground(Object... params) {
-        Log.d(TAG, "BACKGROUND TASK STARTED" + "\n url: " + jsonurl.toString());
-        Weather weather = new Weather();
+        Weather weather;
         try {
-            URL url = new URL(jsonurl.toString());
+            URL url = new URL(jsonUrl.toString());
             HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
             httpURLConnection.setRequestMethod("GET");
             httpURLConnection.connect();
@@ -48,7 +46,6 @@ public class JSONWeatherTask extends AsyncTask<Object, Integer, Weather> {
                     data.append(sc.nextLine());
                 }
             }
-            Log.d(TAG, "JSON read" + "\n url: " + data.toString());
             weather = Weather.parseJSON(data.toString());
         } catch (Exception e) {
             Log.e(TAG, e.getMessage(), e);
@@ -60,11 +57,12 @@ public class JSONWeatherTask extends AsyncTask<Object, Integer, Weather> {
 
     @Override
     protected void onPostExecute(Weather result) {
-        this.wn.notifyObservers(result);
+        obs.changeState();
+        obs.notifyObservers(result);
     }
 
     void register(Observer obs) {
-        this.wn.addObserver(obs);
+        this.obs.addObserver(obs);
     }
 
 }
