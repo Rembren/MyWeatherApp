@@ -3,19 +3,18 @@ package com.rembren.weatherapp;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Scanner;
 
 public class JSONWeatherTask extends AsyncTask<Object, Integer, Weather> {
 
 
     private static final String TAG = "myLog";
 
-    private static String BASE_URL = "http://api.openweathermap.org/data/2.5/weather";
+    private static String BASE_URL = "https://api.openweathermap.org/data/2.5/weather";
 
     private static String WEATHER_MAP_API_KEY = "777097772b15e1966cc3bd58ee851a1c";
 
@@ -40,28 +39,19 @@ public class JSONWeatherTask extends AsyncTask<Object, Integer, Weather> {
         Weather weather = new Weather();
         try {
             URL url = new URL(jsonurl.toString());
-            HttpURLConnection httpURLConnection = url.openConnection();
+            HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+            httpURLConnection.setRequestMethod("GET");
+            httpURLConnection.connect();
             if(httpURLConnection.getResponseCode() == HttpURLConnection.HTTP_OK){
-                InputStreamReader inputStreamReader = new InputStreamReader(httpURLConnection.getInputStream());
-                BufferedReader bufferedReader = new BufferedReader(
-                        inputStreamReader,
-                        8192);
-                String line = null;
-                while((line = bufferedReader.readLine()) != null){
-                    result += line;
+                Scanner sc  = new Scanner(url.openStream());
+                while(sc.hasNext()){
+                    data.append(sc.nextLine());
                 }
-
-                bufferedReader.close();
             }
-
-
-
-            try {
-            } catch (Exception e) {
-                Log.e(getClass().getSimpleName(), e.getMessage() + "- " + e.getCause(), e);
-            }
-        } catch (Throwable t) {
-            Log.e(TAG, t.getMessage(), t);
+            Log.d(TAG, "JSON read" + "\n url: " + data.toString());
+            weather = Weather.parseJSON(data.toString());
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage(), e);
             return null;
         }
         return weather;

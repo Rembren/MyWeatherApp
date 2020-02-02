@@ -39,39 +39,37 @@ public class Weather {
     /**
      * This method parse the string in input and create the relative Weather object.
      *
-     * @param json JSON object read from weather API
+     * @param jsonStr string given in JSON to parse
      * @return Weather object that contains parsed data
      * @throws JSONException if given field wasn't found
      */
-    static Weather parseJSON(JSONObject json) {
+    static Weather parseJSON(String jsonStr) throws JSONException {
         Weather weather = new Weather();
 
         // Parsing the response
-        Log.d(TAG, "jsonobject=" + json);
+        JSONObject json = new JSONObject(jsonStr);
+        Log.d("weather", "jsonobject=" + json);
 
-        try {
-            JSONArray json_weather_main = json.getJSONArray("weather");
-            // We use only the first value
-            JSONObject weatherObj = json_weather_main.getJSONObject(0);
-            weather.weather_main = weatherObj.getString("main");
-            weather.weather_description = weatherObj.getString("description");
-            //Main params
-            JSONObject mainObj = new JSONObject(json.getString("main"));
-            weather.temperature = checkIfKelvin(mainObj.getDouble("temp"));
-            weather.pressure = mainObj.getDouble("pressure");
-            weather.humidity = mainObj.getInt("humidity");
-            // Wind
-            JSONObject wObj = new JSONObject(json.getString("wind"));
-            weather.wind_speed = wObj.getDouble("speed");
-            weather.wind_deg = wObj.getDouble("deg");
-            // Clouds
-            JSONObject cObj = new JSONObject(json.getString("clouds"));
-            weather.clouds = cObj.getInt("all");
-            // City name
-            weather.city_name = json.getString("name");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        //We get weather info (This is an array)
+        JSONArray json_weather_main = json.getJSONArray("weather");
+        // We use only the first value
+        JSONObject weatherObj = json_weather_main.getJSONObject(0);
+        weather.weather_main = weatherObj.getString("main");
+        weather.weather_description = weatherObj.getString("description");
+        //Main params
+        JSONObject mainObj = new JSONObject(json.getString("main"));
+        weather.temperature = checkIfKelvin(mainObj.getDouble("temp"));
+        weather.pressure = mainObj.getDouble("pressure");
+        weather.humidity = mainObj.getInt("humidity");
+        // Wind
+        JSONObject wObj = new JSONObject(json.getString("wind"));
+        weather.wind_speed = wObj.getDouble("speed");
+        weather.wind_deg = wObj.getDouble("deg");
+        // Clouds
+        JSONObject cObj = new JSONObject(json.getString("clouds"));
+        weather.clouds = cObj.getInt("all");
+        // City name
+        weather.city_name = json.getString("name");
         Log.d(TAG, weather.toString());
         return weather;
     }
