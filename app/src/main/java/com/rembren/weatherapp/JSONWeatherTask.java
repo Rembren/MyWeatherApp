@@ -17,7 +17,7 @@ public class JSONWeatherTask extends AsyncTask<Object, Integer, Weather>{
 
     private static String WEATHER_MAP_API_KEY = "777097772b15e1966cc3bd58ee851a1c";
 
-    public static final String METRIC_ENDING = "&units=metric";
+    private static final String METRIC_ENDING = "&units=metric";
 
     private SimpleWeatherObservable obs = new SimpleWeatherObservable(); //simple Observable Object created to nofity event
 
@@ -30,6 +30,7 @@ public class JSONWeatherTask extends AsyncTask<Object, Integer, Weather>{
         super();
         jsonUrl.append(BASE_URL).append("?lat=").append(lat).append("&lon=").append(lon)
                 .append("&APPID=").append(WEATHER_MAP_API_KEY).append(METRIC_ENDING);
+        Log.d(TAG, "Latitude: " + lat + " Longitude: " + lon);
     }
 
     @Override

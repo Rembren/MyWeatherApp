@@ -115,7 +115,7 @@ public class PlaceManagement extends AppCompatActivity implements Observer {
         if (data instanceof Weather){
             Toast.makeText(this, data.toString(), Toast.LENGTH_LONG).show();
             Log.d(TAG, "Background task completed and call observed");
-            //addDataToDatabase(data);
+            addDataToDatabase(data);
         }
 
     }

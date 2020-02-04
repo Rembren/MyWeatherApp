@@ -8,7 +8,7 @@ import androidx.annotation.Nullable;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 4;
     private static final String DATABASE_NAME = "selected_places.db";
     public static final String TABLE_NAME = "selected_places_table";
     public static final String ITEM_ID = "ID";
@@ -48,6 +48,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 PRESSURE + " DOUBLE," +
                 WIND_SPEED + " DOUBLE," +
                 WIND_DEG + " DOUBLE," +
+                CLOUDS + " INTEGER," +
                 RAIN + " BOOLEAN," +
                 SNOW + " BOOLEAN)");
     }
