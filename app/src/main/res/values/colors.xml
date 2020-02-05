@@ -4,4 +4,9 @@
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
     <color name="jetBlack">#0A0A0A</color>
+    <color name="lightBlue">#1ea0f7</color>
+    <color name="darkBlue">#0068ad</color>
+    <color name="magenta">#5c02c9</color>
+
+
 </resources>

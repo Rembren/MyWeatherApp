@@ -77,7 +77,7 @@ public class PlaceManagement extends AppCompatActivity implements Observer {
         });
     }
 
-    private void initRecyclerView(){
+    private void initRecyclerView() {
         RecyclerView recyclerView = findViewById(R.id.recycler_selected_places);
         mAdapter = new SimpleDataRecyclerViewAdapter(this, getAllPlaces());
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -112,7 +112,7 @@ public class PlaceManagement extends AppCompatActivity implements Observer {
 
     @Override
     public void update(Observable observable, Object data) {
-        if (data instanceof Weather){
+        if (data instanceof Weather) {
             Toast.makeText(this, data.toString(), Toast.LENGTH_LONG).show();
             Log.d(TAG, "Background task completed and call observed");
             addDataToDatabase(data);
@@ -138,6 +138,9 @@ public class PlaceManagement extends AppCompatActivity implements Observer {
         cv.put(DatabaseHelper.RAIN, forecast.isRaining());
         cv.put(DatabaseHelper.SNOW, forecast.isSnowing());
         cv.put(DatabaseHelper.CLOUDS, forecast.getClouds());
+        cv.put(DatabaseHelper.UNIX_SUNRISE, forecast.getUnixSunrise());
+        cv.put(DatabaseHelper.UNIX_SUNSET, forecast.getUnixSunset());
+        cv.put(DatabaseHelper.UNIX_TIMEZONE, forecast.getUnixTimezone());
         db.insert(DatabaseHelper.TABLE_NAME, null, cv);
         db.close();
         mAdapter.swapCursor(getAllPlaces());
@@ -163,7 +166,7 @@ public class PlaceManagement extends AppCompatActivity implements Observer {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
-    private Cursor getAllPlaces(){
+    private Cursor getAllPlaces() {
         SQLiteDatabase db = placesDB.getWritableDatabase();
         return db.query(DatabaseHelper.TABLE_NAME, null, null, null, null, null, null);
     }

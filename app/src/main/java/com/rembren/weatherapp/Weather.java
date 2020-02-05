@@ -24,6 +24,9 @@ public class Weather {
     private int clouds;
     private boolean rain;
     private boolean snow;
+    private int unixSunrise;
+    private int unixSunset;
+    private int unixTimezone;
 
 
     @NonNull
@@ -33,7 +36,8 @@ public class Weather {
                 weather_description + " Temperature: " + temperature + " Pressure: " +
                 pressure + " Humidity: " + humidity + " Wind Speed " + wind_speed +
                 " Wind deg: " + wind_deg + " Clouds: " + clouds + " Raining: " + rain + " Snowing: "
-                + snow;
+                + snow + " Sunrise: " + unixSunrise + " Sunset: " + unixSunset + " TIMEZONE: "
+                + unixTimezone;
     }
 
 
@@ -74,6 +78,11 @@ public class Weather {
                 && new JSONObject(json.getString("rain")).has("1h");
         weather.snow = json.has("snow")
                 && new JSONObject(json.getString("snow")).has("1h");
+        // Unix Time
+        JSONObject tObj = new JSONObject(json.getString("sys"));
+        weather.unixSunrise = tObj.getInt("sunrise");
+        weather.unixSunset = tObj.getInt("sunset");
+        weather.unixTimezone = json.getInt("timezone");
 
         Log.d(TAG, weather.toString());
         return weather;
@@ -121,6 +130,18 @@ public class Weather {
 
     boolean isSnowing() {
         return snow;
+    }
+
+    public int getUnixSunrise() {
+        return unixSunrise;
+    }
+
+    public int getUnixSunset() {
+        return unixSunset;
+    }
+
+    public int getUnixTimezone() {
+        return unixTimezone;
     }
 
 }
