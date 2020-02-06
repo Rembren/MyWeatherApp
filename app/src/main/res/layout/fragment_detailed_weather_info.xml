@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/quantum_white_100"
+    android:background="@color/lightBlue"
     tools:context=".DetailedWeatherInfo">
 
 
@@ -15,7 +15,7 @@
         android:layout_marginTop="12dp"
         android:gravity="center"
         android:text="TextView"
-        android:textColor="@color/jetBlack"
+        android:textColor="@color/quantum_white_100"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -27,6 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="TextView"
+        android:textColor="@color/quantum_white_100"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -38,22 +39,23 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:text="TextView"
-        android:textColor="@color/jetBlack"
+        android:textColor="@color/quantum_white_100"
         android:textSize="30sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_date" />
+        app:layout_constraintTop_toBottomOf="@+id/fragment_sunrise" />
 
     <ImageView
         android:id="@+id/fragment_wind_deg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="36dp"
-        android:src="@drawable/ic_arrow_upward_black_24dp"
+        android:src="@drawable/ic_arrow_upward_white_24dp"
+        app:layout_constraintBottom_toTopOf="@+id/fragment_wind_direction"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/fragment_wind_speed"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_temperature" />
+        app:layout_constraintTop_toBottomOf="@+id/fragment_temperature"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
         android:id="@+id/fragment_wind_speed"
@@ -62,7 +64,7 @@
         android:layout_marginTop="36dp"
         android:layout_marginEnd="10dp"
         android:text="TextView"
-        android:textColor="@color/jetBlack"
+        android:textColor="@color/quantum_white_100"
         android:textSize="18sp"
         app:layout_constraintEnd_toStartOf="@+id/fragment_wind_deg"
         app:layout_constraintHorizontal_chainStyle="packed"
@@ -75,7 +77,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="36dp"
         android:text="TextView"
-        android:textColor="@color/jetBlack"
+        android:textColor="@color/quantum_white_100"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -87,11 +89,52 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="36dp"
         android:text="TextView"
-        android:textColor="@color/jetBlack"
+        android:textColor="@color/quantum_white_100"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/fragment_humidity" />
+
+    <TextView
+        android:id="@+id/fragment_sunrise"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="64dp"
+        android:layout_marginTop="10dp"
+        android:text="TextView"
+        android:textColor="@color/quantum_white_100"
+        app:layout_constraintEnd_toStartOf="@+id/fragment_sunset"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fragment_date" />
+
+    <TextView
+        android:id="@+id/fragment_sunset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="64dp"
+        android:text="TextView"
+        android:textColor="@color/quantum_white_100"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/fragment_sunrise"
+        app:layout_constraintTop_toBottomOf="@+id/fragment_date" />
+
+    <TextView
+        android:id="@+id/fragment_wind_direction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="TextView"
+        android:textColor="@color/quantum_white_100"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/fragment_humidity"
+        app:layout_constraintEnd_toEndOf="@+id/fragment_wind_deg"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="@+id/fragment_wind_deg"
+        app:layout_constraintTop_toBottomOf="@+id/fragment_wind_deg" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

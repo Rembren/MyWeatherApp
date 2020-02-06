@@ -22,8 +22,6 @@ public class Weather {
     private double wind_speed;
     private double wind_deg;
     private int clouds;
-    private boolean rain;
-    private boolean snow;
     private int unixSunrise;
     private int unixSunset;
     private int unixTimezone;
@@ -35,8 +33,8 @@ public class Weather {
         return "City: " + city_name + " Weather: " + weather_main + " Description: " +
                 weather_description + " Temperature: " + temperature + " Pressure: " +
                 pressure + " Humidity: " + humidity + " Wind Speed " + wind_speed +
-                " Wind deg: " + wind_deg + " Clouds: " + clouds + " Raining: " + rain + " Snowing: "
-                + snow + " Sunrise: " + unixSunrise + " Sunset: " + unixSunset + " TIMEZONE: "
+                " Wind deg: " + wind_deg + " Clouds: " + clouds + " Raining: " +
+                " Sunrise: " + unixSunrise + " Sunset: " + unixSunset + " TIMEZONE: "
                 + unixTimezone;
     }
 
@@ -73,11 +71,6 @@ public class Weather {
         weather.clouds = cObj.getInt("all");
         // City name
         weather.city_name = json.getString("name");
-        // Precipitation
-        weather.rain = json.has("rain")
-                && new JSONObject(json.getString("rain")).has("1h");
-        weather.snow = json.has("snow")
-                && new JSONObject(json.getString("snow")).has("1h");
         // Unix Time
         JSONObject tObj = new JSONObject(json.getString("sys"));
         weather.unixSunrise = tObj.getInt("sunrise");
@@ -124,23 +117,15 @@ public class Weather {
         return clouds;
     }
 
-    boolean isRaining() {
-        return rain;
-    }
-
-    boolean isSnowing() {
-        return snow;
-    }
-
-    public int getUnixSunrise() {
+    int getUnixSunrise() {
         return unixSunrise;
     }
 
-    public int getUnixSunset() {
+    int getUnixSunset() {
         return unixSunset;
     }
 
-    public int getUnixTimezone() {
+    int getUnixTimezone() {
         return unixTimezone;
     }
 

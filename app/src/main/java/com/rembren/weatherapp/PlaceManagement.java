@@ -1,12 +1,10 @@
 package com.rembren.weatherapp;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -20,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.TypeFilter;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
@@ -44,6 +43,8 @@ public class PlaceManagement extends AppCompatActivity implements Observer {
 
     DatabaseHelper placesDB;
 
+    SQLiteDatabase db;
+
     Place place;
 
     private static final String TAG = "myLog";
@@ -55,8 +56,9 @@ public class PlaceManagement extends AppCompatActivity implements Observer {
         setContentView(R.layout.activity_place_managment);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        placesDB = new DatabaseHelper(this);
 
+        placesDB = new DatabaseHelper(this);
+        db = placesDB.getWritableDatabase();
         // Initialize the SDK
         Places.initialize(getApplicationContext(), getString(R.string.google_api_key));
         // Create a new Places client instance
@@ -71,6 +73,7 @@ public class PlaceManagement extends AppCompatActivity implements Observer {
             public void onClick(View view) {
                 Intent intent = new Autocomplete.IntentBuilder(
                         AutocompleteActivityMode.FULLSCREEN, fields)
+                        .setTypeFilter(TypeFilter.CITIES)
                         .build(context);
                 startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
             }
@@ -94,7 +97,9 @@ public class PlaceManagement extends AppCompatActivity implements Observer {
         if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 place = Autocomplete.getPlaceFromIntent(data);
-                getForecast();
+                if (!isInDatabase(place.getName())) {
+                    getForecast();
+                }
             } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
                 // TODO: Handle the error.
             } else if (resultCode == RESULT_CANCELED) {
@@ -104,46 +109,33 @@ public class PlaceManagement extends AppCompatActivity implements Observer {
     }
 
     private void getForecast() {
-        JSONWeatherTask wt = new JSONWeatherTask(place.getLatLng().latitude, place.getLatLng().longitude);
+        JSONWeatherTask wt = new JSONWeatherTask(place, this);
         wt.register(this);
         wt.execute();
-
     }
 
     @Override
     public void update(Observable observable, Object data) {
         if (data instanceof Weather) {
-            Toast.makeText(this, data.toString(), Toast.LENGTH_LONG).show();
-            Log.d(TAG, "Background task completed and call observed");
-            addDataToDatabase(data);
+            mAdapter.swapCursor(getAllPlaces());
         }
 
     }
 
-    private void addDataToDatabase(Object data) {
-        Weather forecast = (Weather) data;
-        SQLiteDatabase db = placesDB.getWritableDatabase();
-        ContentValues cv = new ContentValues();
-        cv.put(DatabaseHelper.CITY_NAME, place.getName());
-        cv.put(DatabaseHelper.CITY_ADDRESS, place.getAddress());
-        cv.put(DatabaseHelper.LATITUDE, place.getLatLng().latitude);
-        cv.put(DatabaseHelper.LONGITUDE, place.getLatLng().longitude);
-        cv.put(DatabaseHelper.WEATHER_MAIN, forecast.getWeather_main());
-        cv.put(DatabaseHelper.WEATHER_DESCRIPTION, forecast.getWeather_description());
-        cv.put(DatabaseHelper.TEMPERATURE, forecast.getTemperature());
-        cv.put(DatabaseHelper.HUMIDITY, forecast.getHumidity());
-        cv.put(DatabaseHelper.PRESSURE, forecast.getPressure());
-        cv.put(DatabaseHelper.WIND_SPEED, forecast.getWind_speed());
-        cv.put(DatabaseHelper.WIND_DEG, forecast.getWind_deg());
-        cv.put(DatabaseHelper.RAIN, forecast.isRaining());
-        cv.put(DatabaseHelper.SNOW, forecast.isSnowing());
-        cv.put(DatabaseHelper.CLOUDS, forecast.getClouds());
-        cv.put(DatabaseHelper.UNIX_SUNRISE, forecast.getUnixSunrise());
-        cv.put(DatabaseHelper.UNIX_SUNSET, forecast.getUnixSunset());
-        cv.put(DatabaseHelper.UNIX_TIMEZONE, forecast.getUnixTimezone());
-        db.insert(DatabaseHelper.TABLE_NAME, null, cv);
-        db.close();
-        mAdapter.swapCursor(getAllPlaces());
+
+
+    private boolean isInDatabase(String value) {
+        String query = "SELECT * FROM " + DatabaseHelper.TABLE_NAME
+                + " WHERE " + DatabaseHelper.CITY_NAME + " = '" + value + "'";
+        Cursor c = db.rawQuery(query, null);
+        if (c.moveToFirst()) {
+            //Record exist
+            c.close();
+            return true;
+        }
+        //Record available
+        c.close();
+        return false;
     }
 
 
@@ -167,8 +159,8 @@ public class PlaceManagement extends AppCompatActivity implements Observer {
     }
 
     private Cursor getAllPlaces() {
-        SQLiteDatabase db = placesDB.getWritableDatabase();
-        return db.query(DatabaseHelper.TABLE_NAME, null, null, null, null, null, null);
+        return db.query(DatabaseHelper.TABLE_NAME, null, null, null,
+                null, null, null);
     }
 
 

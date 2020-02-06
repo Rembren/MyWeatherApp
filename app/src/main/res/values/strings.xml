@@ -8,6 +8,7 @@
     <string name="title_activity_place_management">PlaceManagement</string>
     <string name="current_location">Current location:</string>
     <string name="selected_locations">Selected locations:</string>
+    <string name="celsius"> °C</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

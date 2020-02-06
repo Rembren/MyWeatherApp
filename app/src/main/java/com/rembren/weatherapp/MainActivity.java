@@ -1,10 +1,12 @@
 package com.rembren.weatherapp;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -12,9 +14,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -26,20 +27,22 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.rembren.weatherapp.recyclerViewAdapters.SimpleDataRecyclerViewAdapter;
 
 import java.time.Clock;
 import java.time.Instant;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
+        GoogleMap.OnInfoWindowClickListener {
 
     private static final String TAG = "myLog";
 
+    public static final String UPDATE_RECEIVED = "UPDATE_RECEIVED";
+
     DatabaseHelper placesDB;
-    SimpleDataRecyclerViewAdapter mAdapter;
     SQLiteDatabase mDatabase;
-    private FusedLocationProviderClient fusedLocationClient;
     private GoogleMap mMap;
+    ForecastUpdater forecastUpdater;
+    LatLngBounds.Builder builder;
     public static final int FEW_CLOUDS_THRESHOLD = 25;
     public static final int SCATTERED_CLOUDS_THRESHOLD = 50;
     public static final int BROKEN_CLOUDS_THRESHOLD = 84;
@@ -48,34 +51,34 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        forecastUpdater = new ForecastUpdater();
         placesDB = new DatabaseHelper(this);
         mDatabase = placesDB.getWritableDatabase();
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(UPDATE_RECEIVED);
+
+        BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                repaintMarkers();
+            }
+        };
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter);
+
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        getForecast();
-
     }
-
-    private void getForecast() {
-    }
-
-/*    private void initRecyclerView(){
-        RecyclerView recyclerView = findViewById(R.id.recycler_main);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mAdapter = new SimpleDataRecyclerViewAdapter(this, getAllPlaces());
-        recyclerView.setAdapter(mAdapter);
-    }*/
 
 
     @Override
     protected void onResume() {
         super.onResume();
+        startService(new Intent(this, ForecastUpdater.class));
         if (mMap != null) {
             refreshMap();
         }
@@ -103,6 +106,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             startActivity(intent);
         } else if (id == R.id.menu_item_notifications) {
             Toast.makeText(this, "notifications", Toast.LENGTH_SHORT).show();
+        } else if (id == R.id.menu_stop_service) {
+            stopService(new Intent(this, forecastUpdater.getClass()));
         }
 
         return super.onOptionsItemSelected(item);
@@ -122,7 +127,29 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void refreshMap() {
         Cursor cursor = getAllPlaces();
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        builder = new LatLngBounds.Builder();
+        repaintMarkers(cursor, builder);
+        moveCameraWithMarkers(cursor);
+    }
+
+    private void moveCameraWithMarkers(Cursor cursor) {
+        if (cursor.getCount() > 0) {
+            LatLngBounds bounds = builder.build();
+            CameraUpdate cu;
+            int width = getResources().getDisplayMetrics().widthPixels;
+            int height = getResources().getDisplayMetrics().heightPixels;
+            int padding = (int) (height * 0.15);
+            if (cursor.getCount() > 1) {
+                cu = CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding);
+            } else {
+                cu = CameraUpdateFactory.newLatLngZoom(bounds.getCenter(), 12);
+            }
+            mMap.animateCamera(cu);
+        }
+    }
+
+    private void repaintMarkers(Cursor cursor, LatLngBounds.Builder builder) {
+        mMap.clear();
         for (int i = 0; i < cursor.getCount(); i++) {
             cursor.moveToPosition(i);
             LatLng currentPos = new LatLng(
@@ -136,18 +163,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mMap.addMarker(marker);
             builder.include(currentPos);
         }
-        if (cursor.getCount() > 0) {
-            LatLngBounds bounds = builder.build();
-            CameraUpdate cu;
-            int width = getResources().getDisplayMetrics().widthPixels;
-            int height = getResources().getDisplayMetrics().heightPixels;
-            int padding = (int) (height * 0.15);
-            if (cursor.getCount() > 1) {
-                cu = CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding);
-            } else {
-                cu = CameraUpdateFactory.newLatLngZoom(bounds.getCenter(), 12);
-            }
-            mMap.animateCamera(cu);
+    }
+
+    private void repaintMarkers() {
+        mMap.clear();
+        Cursor cursor = getAllPlaces();
+        for (int i = 0; i < cursor.getCount(); i++) {
+            cursor.moveToPosition(i);
+            LatLng currentPos = new LatLng(
+                    cursor.getDouble(cursor.getColumnIndex(DatabaseHelper.LATITUDE)),
+                    cursor.getDouble(cursor.getColumnIndex(DatabaseHelper.LONGITUDE)));
+            MarkerOptions marker = new MarkerOptions().position(currentPos)
+                    .title(cursor.getString(cursor.getColumnIndex(DatabaseHelper.CITY_NAME)))
+                    .snippet(cursor.getString(cursor.getColumnIndex(DatabaseHelper.WEATHER_DESCRIPTION)))
+                    .icon(getMarkerIcon(cursor))
+                    .zIndex(i);
+            mMap.addMarker(marker);
         }
     }
 
@@ -211,7 +242,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         int sunriseTime = cursor.getInt(cursor.getColumnIndex(DatabaseHelper.UNIX_SUNRISE));
         int sunsetTime = cursor.getInt(cursor.getColumnIndex(DatabaseHelper.UNIX_SUNSET));
         int currentTime = getUnixTime();
-        Log.d(TAG, "isDay: UTC: " + currentTime);
         return currentTime > sunriseTime && currentTime < sunsetTime;
     }
 
@@ -222,6 +252,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onInfoWindowClick(Marker marker) {
+        marker.hideInfoWindow();
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.setCustomAnimations(R.anim.enter_bottom_to_top, R.anim.exit_top_to_bottom, R.anim.enter_top_to_bottom, R.anim.exit_bottom_to_top);
         DetailedWeatherInfo fragment = new DetailedWeatherInfo((int) marker.getZIndex() + 1, this);
@@ -229,4 +260,5 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ft.addToBackStack(null);
         ft.commit();
     }
+
 }

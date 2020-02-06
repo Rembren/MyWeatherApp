@@ -8,7 +8,7 @@ import androidx.annotation.Nullable;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 7;
     private static final String DATABASE_NAME = "selected_places.db";
     public static final String TABLE_NAME = "selected_places_table";
     public static final String ITEM_ID = "ID";
@@ -27,8 +27,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     static final String WIND_SPEED = "WIND_SPEED";
     static final String WIND_DEG = "WIND_DEG";
     static final String CLOUDS = "CLOUDS";
-    static final String RAIN = "RAIN";
-    static final String SNOW = "SNOW";
 
 
     public DatabaseHelper(@Nullable Context context) {
@@ -53,9 +51,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 PRESSURE + " DOUBLE," +
                 WIND_SPEED + " DOUBLE," +
                 WIND_DEG + " DOUBLE," +
-                CLOUDS + " INTEGER," +
-                RAIN + " BOOLEAN," +
-                SNOW + " BOOLEAN)");
+                CLOUDS + " INTEGER)");
     }
 
     @Override

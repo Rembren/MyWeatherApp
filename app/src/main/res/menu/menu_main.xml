@@ -6,5 +6,8 @@
         android:title="Manage places" />
     <item
         android:id="@+id/menu_item_notifications"
-        android:title="Manage notifications" />
+        android:title="Notifications" />
+    <item
+        android:id="@+id/menu_stop_service"
+        android:title="Stop service" />
 </menu>
