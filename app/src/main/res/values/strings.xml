@@ -4,7 +4,7 @@
     <string name="tab_text_2">City selection</string>
     <string name="tab_text_3">Tab 3</string>
     <string name="google_api_key">GOOGLEAPIKEY</string>
-    <string name="weather_map_api_key">777097772b15e1966cc3bd58ee851a1c</string>
+    <string name="weather_map_api_key">WEATHER_API_KEY</string>
     <string name="title_activity_place_management">PlaceManagement</string>
     <string name="current_location">Current location:</string>
     <string name="selected_locations">Selected locations:</string>
